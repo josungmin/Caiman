@@ -16,7 +16,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -29,16 +29,41 @@ protected:
 		TObjectPtr<class UCameraComponent> Camera;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<class UInputAction> MoveAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<class UInputAction> RunningAction;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<class UInputAction> DashAction;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<class UInputAction> JumpAction;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<class UInputAction> LookAction;
+
+protected:
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation/Dash", Meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<class UAnimMontage> DashMontage;
+
 
 protected:
 	void OnMove(const FInputActionValue& Value);
 	void OnLook(const FInputActionValue& Value);
+
+	bool bIsRunning = false;
+	void OnRunning();
+	void OffRunning();
+
+	bool bIsDash = false;
+	void OnDash();
+
+public:
+	UFUNCTION(BlueprintCallable)
+		bool GetIsRunning();
 };

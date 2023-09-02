@@ -29,7 +29,7 @@ ACCharacterBase::ACCharacterBase()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
 	GetCharacterMovement()->JumpZVelocity = 500.0f;
 	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 400.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;
 }
@@ -72,6 +72,28 @@ void ACCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACCharacterBase::OnMove);
 	}
+
+	if (LookAction)
+	{
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACCharacterBase::OnLook);
+	}
+
+	if (RunningAction)
+	{
+		EnhancedInputComponent->BindAction(RunningAction, ETriggerEvent::Triggered, this, &ACCharacterBase::OnRunning);
+		EnhancedInputComponent->BindAction(RunningAction, ETriggerEvent::Completed, this, &ACCharacterBase::OffRunning);
+	}
+
+	if (JumpAction)
+	{
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACCharacterBase::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACCharacterBase::StopJumping);
+	}
+
+	if (DashAction)
+	{
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &ACCharacterBase::OnDash);
+	}
 }
 
 void ACCharacterBase::OnMove(const FInputActionValue& Value)
@@ -88,3 +110,41 @@ void ACCharacterBase::OnMove(const FInputActionValue& Value)
 	AddMovementInput(RightDirection, MovementVector.X);
 }
 
+void ACCharacterBase::OnLook(const FInputActionValue& Value)
+{
+	FVector2D MouseVector = Value.Get<FVector2D>();
+
+	AddControllerYawInput(MouseVector.X);
+	AddControllerPitchInput(MouseVector.Y);
+}
+
+bool ACCharacterBase::GetIsRunning()
+{
+	return bIsRunning;
+}
+
+void ACCharacterBase::OnRunning()
+{
+	bIsRunning = true;
+	GetCharacterMovement()->MaxWalkSpeed = 800.0f;
+}
+
+void ACCharacterBase::OffRunning()
+{
+	bIsRunning = false;
+	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+}
+
+void ACCharacterBase::OnDash()
+{
+	const FVector FwdVector = this->GetActorRotation().Vector();
+	const float DashDistance = 3000.0f;
+
+	LaunchCharacter(FwdVector * DashDistance, true, true);
+
+	if (DashMontage)
+	{
+		UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+		animInstance->Montage_Play(DashMontage);
+	}
+}
